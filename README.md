@@ -108,7 +108,7 @@ Clone it next to your workspace (not inside `~/.claude/` — keep the source rep
 
 ```bash
 cd ~/your-workspace   # or wherever you keep repos
-git clone https://github.com/kvk-cmd/self-improving-claude.git
+git clone https://github.com/kirilklein/self-improving-claude.git
 ```
 
 ### 2. Copy files to `~/.claude/`
