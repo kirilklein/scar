@@ -1,5 +1,7 @@
 # Self-Improving Claude
 
+> **⚡ The core ideas of this repo now live in [claude-feedback-loops](https://github.com/kirilklein/claude-feedback-loops)** — a lightweight Claude Code *plugin* focused on the three loops that memory tools don't close: review calibration from human PR feedback, pipeline gap tracking, and a confidence ladder for lessons. Install with `/plugin marketplace add kirilklein/claude-feedback-loops`. This repo remains as the full working-config reference.
+
 A complete, self-improving [Claude Code](https://docs.anthropic.com/en/docs/claude-code) setup that gets better the more you use it. It learns from mistakes, captures reusable workflows, calibrates its own code reviews from human feedback, and tightens its own development pipeline over time.
 
 **This is not a library or a framework.** It's a working configuration — a set of markdown files, shell scripts, and conventions — that you drop into `~/.claude/` and customize for your projects.
