@@ -1,50 +1,112 @@
-<p align="center"><img src="assets/logo.png" alt="Scar" width="420"></p>
+<h1 align="center">Scar</h1>
+<p align="center"><strong>Your coding agent shouldn't make the same mistake twice.</strong></p>
+<p align="center">Turn review feedback and CI misses into checks for the next change.</p>
 
-# Scar
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg" alt="Claude Code plugin"></a>
+  <img src="https://img.shields.io/badge/runtime-none-lightgrey.svg" alt="No runtime">
+</p>
 
-**Your coding agent shouldn't make the same mistake twice.**
+A reviewer catches a missing validation check. Claude fixes it. Three PRs later, it makes the same mistake. Scar records that feedback as a concrete check that its `/review` command loads next time.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://docs.anthropic.com/en/docs/claude-code)
-![No runtime](https://img.shields.io/badge/runtime-none-lightgrey.svg)
+The same idea applies to your workflow: log what slipped past an earlier stage, find recurring causes, and fix the place that should have caught them. **Five slash commands. Three Markdown files.** Works alongside your existing workflow and memory tools.
 
-Coding agents are good at fixing mistakes and bad at learning from them. A reviewer tells Claude that every new public sequence parameter needs validation; Claude fixes it; three PRs later it does the same thing again. Scar gives your coding agent scar tissue: when CI, a review bot or a human catches something Claude should have caught earlier, Scar records the miss and turns repeated feedback into checks for future reviews.
+<p align="center">
+  <img src="assets/feedback-loops.svg" width="960" alt="Three feedback paths: /gap records pipeline misses in workflow-gaps.md, then /gaps proposes fixes; /retro turns human PR feedback into review-calibration.md, loaded by /review; /retro or you add lessons.md entries, which /promote audits and /review reads at higher confidence levels. Apply the results to the next change and record new feedback.">
+</p>
 
-The mechanism underneath is **pipeline gap** tracking. Every time a later stage catches something an earlier one should have — review finds what tests missed, CI fails on what passed locally, a human spots what the bot didn't — that is a gap. Everyone experiences them; almost nobody logs them. `/gap` writes one line per gap, from inside whatever workflow you already have, and `/gaps` periodically clusters the log by root cause and closes each cluster at the cheapest layer that can hold it.
+## Quick start
 
-<img src="assets/loop2.svg" alt="Loop: /gap logs one line → workflow-gaps.md → /gaps clusters by root cause → tighter pipeline">
+1. Install in Claude Code:
 
-It ships with two smaller loops that share the same shape (log the signal, then act on it in bulk): review calibration from human PR feedback, and a confidence ladder for lessons. **Five slash commands. Three markdown files. No runtime, no database, no pipeline to adopt.** Works alongside whatever memory setup and ship workflow you already have.
+   ```text
+   /plugin marketplace add kirilklein/scar
+   /plugin install scar@scar
+   ```
 
-## What six months of gap logging looks like
+2. Add the [gap-logging snippet](templates/claude-md-snippet.md) to your project's `CLAUDE.md`. It tells Claude to record a miss before fixing it. You can also log one yourself:
 
-From the author's own logs — 19 gaps across four projects, February to August 2026:
+   ```text
+   /gap test ci "mocks not updated for new return type"
+   ```
 
-| Should have caught it | Actually caught it | Gaps |
+3. After five or more entries, run `/gaps` to group recurring causes and propose fixes. You approve changes before they are applied.
+
+4. To learn from a past human review, run `/retro <pr-number>`, then use Scar's `/review` on your next diff. Findings drawn from that feedback are tagged `[calibrated]`.
+
+## Commands
+
+| Command | Purpose | When to run it |
 |---|---|---|
-| local `/review` | bot review, after push | 6 |
-| tests | local `/review` | 4 |
-| local `/review` | human reviewer | 2 |
-| the pipeline tooling itself broke (wrong lint flags, missing venv, a hook misreading the branch) | — | 5 |
-| other | | 2 |
+| `/gap` | Record what slipped through and which stage caught it | When CI, a reviewer, or production reveals a miss |
+| `/gaps` | Group misses by root cause and propose a fix for each group | Every week or two, or after five entries |
+| `/retro` | Turn human PR feedback into specific review checks and lessons | After a human reviews your PR |
+| `/review` | Review a diff using the project's accumulated checks and lessons | Before pushing, or on demand |
+| `/promote` | Promote, demote, or retire lessons based on evidence | When lessons need a refresh |
 
-Two clusters turned into concrete pipeline changes:
+## How it works
 
-- **6 of 19 were review misses the bot caught anyway** — so the pipeline was reordered to open the PR *before* the local review. CI and the bot now run while the diff is being read, and local and remote findings get fixed in one pass instead of two.
-- **3 were "reviewed the changed files, not their callers"** (a changed return type, stale test mocks, a third call site of a threaded flag) — so "grep every use of a changed signature" became an explicit review step.
+### Catch recurring workflow gaps
 
-None of that would have happened from memory alone. Individually each gap is a shrug; the log is what makes the pattern visible.
+A **gap** is something a later stage caught that an earlier stage should have. `/gap` records one line in `.claude/workflow-gaps.md`:
 
-## Example: one retro
+```markdown
+- [2026-03-12] review → bot-review: changed return type to tuple but only reviewed changed files, not callers
+```
 
-Real run on [statsmodels PR #10223](https://github.com/statsmodels/statsmodels/pull/10223), where the maintainer asked for a new `ps_bounds` kwarg to be `array_like` with validation instead of a raw tuple. `/retro 10223` produced:
+The stages use a fixed vocabulary so `/gaps` can count them: `format`, `lint`, `types`, `test`, `review`, `ci`, `bot-review`, `human-review`, `production`, and `tooling`.
 
-> **PR #10223 (merged)** — one human reviewer (bashtage), one substantive comment, no bugs or edge cases caught.
->
-> - **Convention**: `ps_bounds` was documented as `tuple of float` and stored raw. Reviewer required `array_like of float` + `array_like(...)` validation, plus an explicit range check. Fixed in `21f9af8`.
-> - No design, bug, or edge-case findings; approved after the one round.
+`/gaps` shows which stages miss the most, groups entries by root cause, and proposes a fix at the cheapest effective layer. It prefers an automated check, then a better test command or mapping, then a review calibration entry, and finally a lesson. Once you approve the fixes, it applies them and marks the addressed gaps as resolved.
 
-and appended this to `.claude/review-calibration.md`:
+Call `/gap` directly, use the `CLAUDE.md` snippet, or add it to your existing `/ship` or CI-triage command.
+
+### Turn human feedback into review checks
+
+`/retro` reads human PR comments and asks: could `/review` have caught this? Each actionable miss becomes a specific pattern in `.claude/review-calibration.md`:
+
+```markdown
+## Bugs
+- Watch for off-by-one at pagination boundaries when page_size divides the total — learned from PR #17
+```
+
+Scar's `/review` loads that file on each run and marks findings based on those patterns with `[calibrated]`. Codebase gotchas go into `.claude/lessons.md` instead.
+
+### Keep lessons grounded in evidence
+
+Lessons have three confidence levels:
+
+| Level | Evidence | How to use it |
+|---|---|---|
+| **Observation** | Noticed once | Context to investigate |
+| **Proven Pattern** | Confirmed at least twice | Follow by default |
+| **Hard Rule** | A violation caused a real failure | Mandatory |
+
+`/promote` checks lessons against the current code and available evidence. It promotes supported entries, demotes contradicted ones, merges duplicates, and retires lessons about deleted code. `/review` reads Proven Patterns and Hard Rules.
+
+## From actual use
+
+The author's logs contain **19 gaps across four projects**, recorded from February to August 2026:
+
+| Expected to catch it | Actually caught it | Gaps |
+|---|---|---:|
+| Local `/review` | Bot review after push | 6 |
+| Tests | Local `/review` | 4 |
+| Local `/review` | Human reviewer | 2 |
+| Workflow tooling failures | — | 5 |
+| Other | — | 2 |
+
+The logs led to two workflow changes:
+
+- **Six misses surfaced in bot review.** The author's workflow now opens the PR before local review, so CI and the bot can run while the diff is being read. Local and remote findings can then be addressed together.
+- **Three misses involved callers of changed code.** Searching every use of a changed signature became an explicit review step.
+
+These are examples from one developer's workflow, rather than a benchmark of review accuracy.
+
+<details>
+<summary><strong>Example: a maintainer comment becomes a reusable check</strong></summary>
+
+On [statsmodels PR #10223](https://github.com/statsmodels/statsmodels/pull/10223), a maintainer asked for a new `ps_bounds` parameter to accept and validate `array_like` input instead of storing a raw tuple. `/retro 10223` added a project-specific check to `.claude/review-calibration.md`:
 
 ```markdown
 ## Conventions
@@ -55,105 +117,26 @@ and appended this to `.claude/review-calibration.md`:
   Flag any new user-facing sequence kwarg stored raw via `self.x = x` — learned from PR #10223
 ```
 
-One human comment became a check that runs on every future review of that codebase. Output trimmed only for length.
+The next Scar review loads that check alongside its standard review instructions.
 
-## Try it in five minutes
+</details>
 
-1. Install:
+## Where the feedback lives
 
-   ```
-   /plugin marketplace add kirilklein/scar
-   /plugin install scar@scar
-   ```
+All files live in your project's `.claude/` directory. They are plain Markdown; commit them to share the checks with your team.
 
-2. Paste [`templates/claude-md-snippet.md`](templates/claude-md-snippet.md) into your project's `CLAUDE.md`. Three sentences. From now on, when CI goes red on something that passed locally or a reviewer flags what tests missed, Claude runs `/gap` before fixing it. Or skip the snippet and run `/gap test ci "mocks not updated for new return type"` yourself.
-
-3. After 5+ entries, run `/gaps`. It prints where the pipeline leaks most and proposes one fix per root cause.
-
-4. Optional: pick a past PR where a human left comments and run `/retro <number>`. From now on `/review` loads the resulting calibration file and tags findings it produces with `[calibrated]`.
-
-## Commands
-
-| Command | What it does | Run it when |
+| File | Updated by | Used by |
 |---|---|---|
-| `/gap` | Appends one line to the gap log: which layer should have caught it, which did, what slipped through | The moment CI, a bot, or a human catches what an earlier stage missed |
-| `/gaps` | Prints a leak table (counts per should-have → caught-by), clusters by root cause, closes each at the cheapest layer (lint config > test mapping > calibration > lesson) | Every week or two, or at 5+ entries |
-| `/retro` | Reads human PR comments, asks *"could `/review` have caught this?"*, writes each miss as a concrete calibration pattern | After humans review your PR |
-| `/review` | Focused code review that loads your calibration patterns and tags their findings `[calibrated]` | Before pushing, or on demand |
-| `/promote` | Audits `lessons.md`: promotes entries with fresh evidence, demotes contradicted ones, retires entries about deleted code | When lessons feel stale |
+| `workflow-gaps.md` | `/gap`, `/gaps` | `/gaps` |
+| `review-calibration.md` | `/retro`, approved `/gaps` fixes | `/review` |
+| `lessons.md` | `/retro`, `/promote`, approved `/gaps` fixes, you | `/review`, `/promote` |
 
-## The loops in detail
+Starter files are in [`templates/`](templates/). Scar adds no runtime or database and does not run your CI or replace your workflow. The commands need to be run: `/gaps` periodically, `/retro` after human feedback, and `/review` to apply the accumulated checks.
 
-### 1. Pipeline gap tracking — `/gap` → `/gaps`
+## Origins and contributing
 
-A gap is a **later stage catching what an earlier one should have**. `/gap` logs one line, naming both layers from a fixed vocabulary (`format lint types test review ci bot-review human-review production tooling`) so they can be counted:
+Scar began as a full `~/.claude/` configuration. That setup is preserved on the [`config` branch](https://github.com/kirilklein/scar/tree/config), tagged `v0.1-config`.
 
-```markdown
-- [2026-03-12] review → bot-review: changed return type to tuple but only reviewed changed files, not callers
-```
+The most useful contribution is a calibration pattern that caught a real issue. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [calibration pattern issue template](.github/ISSUE_TEMPLATE/calibration-pattern.md).
 
-**Fitting it into your workflow.** There is no pipeline to adopt; `/gap` is called from wherever you already notice the miss:
-
-- *Nothing to set up:* run `/gap` yourself when CI or a reviewer surprises you.
-- *One paragraph in `CLAUDE.md`* ([template](templates/claude-md-snippet.md)): Claude then runs `/gap` on its own inside whatever ship, triage or review command you already use — the moment it reads the red CI run or the PR comment, before it starts fixing.
-- *Your own commands:* if you have a `/ship` or `/triage-ci`, add one line telling it to call `/gap` when a later step catches an earlier step's miss.
-
-`/gaps` then prints the leak table (where does it leak most?), clusters by root cause and closes each cluster at the cheapest layer: a lint or type-checker config change closes a gap *mechanically*; a test-mapping change closes it *on every run*; a calibration entry closes it *probabilistically*; a lesson closes it only if it's remembered.
-
-### 2. Review calibration — `/retro` → `/review`
-
-<img src="assets/loop1.svg" alt="Loop: human PR feedback → /retro → review-calibration.md → /review → sharper findings">
-
-After humans review your PR, `/retro` reads their comments and distills each miss into a pattern specific enough to act on:
-
-```markdown
-## Bugs
-- Watch for off-by-one at pagination boundaries when page_size divides the total — learned from PR #17
-```
-
-`/review` loads these every run and tags the findings they produce with `[calibrated]`, so you can watch the loop pay for itself. Your reviews get sharper with every PR that gets human eyes.
-
-### 3. The confidence ladder — `lessons.md` → `/promote`
-
-<img src="assets/loop3.svg" alt="Loop: Observation → Proven Pattern → Hard Rule, audited by /promote">
-
-The problem with accumulated lessons is they're all treated equally — a hunch from March sits next to a rule that prevented a production bug. The ladder fixes that:
-
-| Level | Meaning | How an entry gets here |
-|---|---|---|
-| **Hard Rules** | Mandatory | A violation caused a real failure |
-| **Proven Patterns** | Default to following | Confirmed 2+ times |
-| **Observations** | Context, not gospel | Noticed once |
-
-`/promote` moves entries up only with evidence it can point to, demotes ones the code has moved past, and retires ones about deleted code. Your lessons file stays small and trustworthy instead of growing into a second codebase.
-
-## Files it maintains
-
-Per project, in `.claude/` — all plain markdown, checked into git, shared with your team:
-
-| File | Written by | Read by |
-|---|---|---|
-| `review-calibration.md` | `/retro` | `/review` |
-| `workflow-gaps.md` | `/gap` | `/gaps` |
-| `lessons.md` | `/retro`, you | `/review`, `/promote` |
-
-Templates in [`templates/`](templates/).
-
-## What this is not
-
-- **Not a memory system** — pair it with one; it calibrates what memory captures.
-- **Not a pipeline** — it does not run your formatter, tests or push. It fits into whatever already does.
-- **Not a framework** — five prompts and three markdown files you can read in ten minutes.
-- **Not magic** — the loops only close if you run `/gaps` every week or two and `/retro` after human reviews. That's the whole discipline.
-
-## Origins
-
-This repo started as a full working `~/.claude/` configuration with these loops wired into a `/ship` pipeline. That setup is preserved on the [`config` branch](https://github.com/kirilklein/scar/tree/config) (tag `v0.1-config`) for anyone who wants the whole thing. The plugin keeps only the ideas that memory plugins haven't since absorbed.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). The most useful contribution is a calibration pattern that caught something real: there is an [issue template](.github/ISSUE_TEMPLATE/calibration-pattern.md) for it.
-
-## License
-
-[MIT](LICENSE)
+[MIT license](LICENSE).
