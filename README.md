@@ -1,4 +1,9 @@
-<h1 align="center">Scar</h1>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" alt="Scar" width="360">
+  </picture>
+</p>
 <p align="center"><strong>Your coding agent shouldn't make the same mistake twice.</strong></p>
 <p align="center">Turn review feedback and CI misses into checks for the next change.</p>
 
@@ -34,6 +39,63 @@ The same idea applies to your workflow: log what slipped past an earlier stage, 
 3. After five or more entries, run `/gaps` to group recurring causes and propose fixes. You approve changes before they are applied.
 
 4. To learn from a past human review, run `/retro <pr-number>`, then use Scar's `/review` on your next diff. Findings drawn from that feedback are tagged `[calibrated]`.
+
+## Example: one review comment, one caught bug
+
+An illustrative walkthrough on a Django shop backend. The diff, comment, and `/retro` output are written for this example; the `/review` output at the end is a real run of the plugin against that code. (The statsmodels retro further down is a real run end to end.)
+
+**1. The change.** A PR speeds up an expiry job by replacing a `save()` loop with one query:
+
+```diff
+ def expire_stale_orders(cutoff):
+-    for order in Order.objects.filter(status="pending", created_at__lt=cutoff):
+-        order.status = "expired"
+-        order.save()
++    Order.objects.filter(status="pending", created_at__lt=cutoff).update(status="expired")
+```
+
+Tests pass. The local review sees only the changed file and nothing looks wrong.
+
+**2. The reviewer.** A colleague who knows the codebase leaves one comment:
+
+> `update()` skips `save()`, so `updated_at` (an `auto_now` field) stays stale and the `post_save` receiver in `orders/signals.py` that pushes expired orders to the search index never fires. Stale orders keep showing up in search. Load and save, or call the sync explicitly.
+
+The mistake is not in the diff. It is in a file the diff does not touch.
+
+**3. `/retro 42`** reads the comment, decides `/review` could have caught it with the right check, and appends to `.claude/review-calibration.md`:
+
+```markdown
+## Bugs
+- When a diff introduces `QuerySet.update()`, `bulk_update()` or `bulk_create()` on a model,
+  grep for `auto_now` fields on that model and for `post_save`/`pre_save` receivers with
+  `sender=<Model>`; flag any that the bulk path now bypasses — learned from PR #42
+```
+
+It also adds an Observation to `.claude/lessons.md`: the Order search-index sync lives in `orders/signals.py`, not in the service layer.
+
+**4. Two weeks later**, a different PR makes a payment webhook idempotent, using the same shortcut on a different model:
+
+```diff
+     event = json.loads(request.body)
+-    invoice = Invoice.objects.get(external_id=event["invoice_id"])
+-    invoice.status = "paid"
+-    invoice.save()
++    updated = Invoice.objects.filter(
++        external_id=event["invoice_id"], status="open"
++    ).update(status="paid")
++    if not updated:
++        return HttpResponse(status=204)  # already paid or voided; webhook retried
+     return HttpResponse(status=204)
+```
+
+`/review` on that diff, with the calibration entry loaded:
+
+> **Summary:** The switch to a conditional `update()` correctly fixes the double-processing race on webhook retries, but it silently drops the receipt email and the `updated_at` timestamp.
+>
+> - **High** `billing/webhooks.py:26` [calibrated] — `QuerySet.update()` bypasses `post_save`, so `email_receipt_when_paid` in `billing/signals.py:8` never fires. Customers stop receiving receipts on every payment. Fix: when `updated` is truthy, call `send_receipt` explicitly, or lock the row with `select_for_update()` and save it. The save path keeps both the signal and the race fix.
+> - **Medium** `billing/webhooks.py:26` [calibrated] — `update()` also skips `auto_now` on `updated_at`, so paid invoices keep a stale timestamp. If you keep `update()`, add `updated_at=timezone.now()` to the call.
+
+Output trimmed for length only. The reviewer made the comment once. The check now runs on every review of that repository.
 
 ## Commands
 
