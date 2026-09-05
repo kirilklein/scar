@@ -1,6 +1,6 @@
-<p align="center"><img src="assets/logo.png" alt="claude-feedback-loops" width="420"></p>
+<p align="center"><img src="assets/logo.png" alt="Self-Improving Claude" width="420"></p>
 
-# claude-feedback-loops
+# Self-Improving Claude
 
 **Your pipeline tells you where it leaks. This plugin makes you write it down.**
 
@@ -60,8 +60,8 @@ One human comment became a check that runs on every future review of that codeba
 1. Install:
 
    ```
-   /plugin marketplace add kirilklein/claude-feedback-loops
-   /plugin install feedback-loops@claude-feedback-loops
+   /plugin marketplace add kirilklein/self-improving-claude
+   /plugin install feedback-loops@self-improving-claude
    ```
 
 2. Paste [`templates/claude-md-snippet.md`](templates/claude-md-snippet.md) into your project's `CLAUDE.md`. Three sentences. From now on, when CI goes red on something that passed locally or a reviewer flags what tests missed, Claude runs `/gap` before fixing it. Or skip the snippet and run `/gap test ci "mocks not updated for new return type"` yourself.
@@ -146,7 +146,7 @@ Templates in [`templates/`](templates/).
 
 ## Origins
 
-Distilled from [self-improving-claude](https://github.com/kirilklein/self-improving-claude), a full working `~/.claude/` configuration. This repo keeps only the ideas that memory plugins haven't since absorbed, repackaged as an installable plugin.
+This repo started as a full working `~/.claude/` configuration with these loops wired into a `/ship` pipeline. That setup is preserved on the [`config` branch](https://github.com/kirilklein/self-improving-claude/tree/config) (tag `v0.1-config`) for anyone who wants the whole thing. The plugin keeps only the ideas that memory plugins haven't since absorbed.
 
 ## Contributing
 

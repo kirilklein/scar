@@ -5,7 +5,17 @@
   "author": {
     "name": "Kiril Klein"
   },
-  "homepage": "https://github.com/kirilklein/claude-feedback-loops",
+  "homepage": "https://github.com/kirilklein/self-improving-claude",
   "license": "MIT",
-  "keywords": ["pipeline", "gaps", "ci", "review", "calibration", "retro", "feedback", "lessons"]
+  "keywords": [
+    "pipeline",
+    "gaps",
+    "ci",
+    "review",
+    "calibration",
+    "retro",
+    "feedback",
+    "lessons"
+  ],
+  "repository": "https://github.com/kirilklein/self-improving-claude"
 }

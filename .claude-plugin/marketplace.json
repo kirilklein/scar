@@ -1,5 +1,6 @@
 {
-  "name": "claude-feedback-loops",
+  "name": "self-improving-claude",
+  "description": "Feedback loops that make Claude Code improve with use: review calibration from human PR feedback, pipeline gap tracking, a confidence ladder for lessons.",
   "owner": {
     "name": "Kiril Klein"
   },
