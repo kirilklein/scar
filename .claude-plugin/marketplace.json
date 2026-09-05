@@ -1,14 +1,14 @@
 {
-  "name": "self-improving-claude",
-  "description": "Feedback loops that make Claude Code improve with use: review calibration from human PR feedback, pipeline gap tracking, a confidence ladder for lessons.",
+  "name": "scar",
+  "description": "Scar tissue for your coding agent: when CI, a review bot or a human catches what Claude should have caught earlier, log the miss and turn repeated feedback into checks for future reviews. Pipeline gap tracking, PR-feedback review calibration and a confidence ladder for lessons.",
   "owner": {
     "name": "Kiril Klein"
   },
   "plugins": [
     {
-      "name": "feedback-loops",
+      "name": "scar",
       "source": "./",
-      "description": "Pipeline gap tracking for Claude Code: log every time a later stage catches what an earlier one missed, then close the gaps by root cause. Plus PR-feedback review calibration and a confidence ladder for lessons."
+      "description": "Scar tissue for your coding agent: when CI, a review bot or a human catches what Claude should have caught earlier, log the miss and turn repeated feedback into checks for future reviews. Pipeline gap tracking, PR-feedback review calibration and a confidence ladder for lessons."
     }
   ]
 }
