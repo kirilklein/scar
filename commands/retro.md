@@ -20,7 +20,7 @@ Close the loop on the current PR: what did human reviewers catch that `/review` 
 5. **Update calibration**: append to `.claude/review-calibration.md` (create from the plugin's `templates/review-calibration.md` if missing):
    ```
    ## [Category]
-   - [Specific pattern to watch for] — learned from PR #NNN
+   - [Specific pattern to watch for] — learned from PR #NNN, YYYY-MM-DD
    ```
    No vague entries. "Watch for off-by-one in pagination boundaries" — yes. "Be more careful" — no.
 

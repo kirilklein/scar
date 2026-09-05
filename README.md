@@ -68,7 +68,7 @@ The mistake is not in the diff. It is in a file the diff does not touch.
 ## Bugs
 - When a diff introduces `QuerySet.update()`, `bulk_update()` or `bulk_create()` on a model,
   grep for `auto_now` fields on that model and for `post_save`/`pre_save` receivers with
-  `sender=<Model>`; flag any that the bulk path now bypasses — learned from PR #42
+  `sender=<Model>`; flag any that the bulk path now bypasses — learned from PR #42, 2026-09-05
 ```
 
 It also adds an Observation to `.claude/lessons.md`: the Order search-index sync lives in `orders/signals.py`, not in the service layer.
@@ -105,7 +105,7 @@ Output trimmed for length only. The reviewer made the comment once. The check no
 | `/gaps` | Group misses by root cause and propose a fix for each group | Every week or two, or after five entries |
 | `/retro` | Turn human PR feedback into specific review checks and lessons | After a human reviews your PR |
 | `/review` | Review a diff using the project's accumulated checks and lessons | Before pushing, or on demand |
-| `/promote` | Promote, demote, or retire lessons based on evidence | When lessons need a refresh |
+| `/promote` | Promote, demote, or retire lessons and calibration entries based on evidence | Monthly, or when nudged at session start |
 
 ## How it works
 
@@ -129,7 +129,7 @@ Call `/gap` directly, use the `CLAUDE.md` snippet, or add it to your existing `/
 
 ```markdown
 ## Bugs
-- Watch for off-by-one at pagination boundaries when page_size divides the total — learned from PR #17
+- Watch for off-by-one at pagination boundaries when page_size divides the total — learned from PR #17, 2026-03-12
 ```
 
 Scar's `/review` loads that file on each run and marks findings based on those patterns with `[calibrated]`. Codebase gotchas go into `.claude/lessons.md` instead.
@@ -144,7 +144,7 @@ Lessons have three confidence levels:
 | **Proven Pattern** | Confirmed at least twice | Follow by default |
 | **Hard Rule** | A violation caused a real failure | Mandatory |
 
-`/promote` checks lessons against the current code and available evidence. It promotes supported entries, demotes contradicted ones, merges duplicates, and retires lessons about deleted code. `/review` reads Proven Patterns and Hard Rules.
+`/promote` checks lessons and calibration entries against the current code and available evidence. It promotes supported entries, demotes contradicted ones, merges duplicates, and retires entries about deleted code or checks a linter now performs. `/review` reads Proven Patterns and Hard Rules.
 
 ## From actual use
 
@@ -176,7 +176,7 @@ On [statsmodels PR #10223](https://github.com/statsmodels/statsmodels/pull/10223
   `array_like of float` in the docstring, not `tuple of float`, and converted/validated
   at `__init__` with `statsmodels.tools.validation.array_like(value, "name", shape=(n,))`
   — then add an explicit check for what array_like cannot express (value ranges, ordering).
-  Flag any new user-facing sequence kwarg stored raw via `self.x = x` — learned from PR #10223
+  Flag any new user-facing sequence kwarg stored raw via `self.x = x` — learned from PR #10223, 2026-09-03
 ```
 
 The next Scar review loads that check alongside its standard review instructions.
@@ -190,10 +190,10 @@ All files live in your project's `.claude/` directory. They are plain Markdown; 
 | File | Updated by | Used by |
 |---|---|---|
 | `workflow-gaps.md` | `/gap`, `/gaps` | `/gaps` |
-| `review-calibration.md` | `/retro`, approved `/gaps` fixes | `/review` |
+| `review-calibration.md` | `/retro`, `/promote`, approved `/gaps` fixes | `/review`, `/promote` |
 | `lessons.md` | `/retro`, `/promote`, approved `/gaps` fixes, you | `/review`, `/promote` |
 
-Starter files are in [`templates/`](templates/). Scar adds no runtime or database and does not run your CI or replace your workflow. The commands need to be run: `/gaps` periodically, `/retro` after human feedback, and `/review` to apply the accumulated checks.
+Starter files are in [`templates/`](templates/). Scar adds no runtime or database and does not run your CI or replace your workflow. The commands need to be run: `/gaps` periodically, `/retro` after human feedback, `/promote` to prune, and `/review` to apply the accumulated checks. A session-start hook prints a one-line reminder when a file has not been audited in 30 days or the gap log has five or more unresolved entries, and stays silent otherwise.
 
 ## Origins and contributing
 

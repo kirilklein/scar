@@ -1,8 +1,8 @@
 ---
-description: Audit lessons.md — promote, demote, or retire entries on the confidence ladder
+description: Audit lessons.md and review-calibration.md — promote, demote, or retire stale entries
 ---
 
-Maintain `.claude/lessons.md` so it stays small, current, and trustworthy. Memory tools capture; this command calibrates.
+Maintain `.claude/lessons.md` and `.claude/review-calibration.md` so they stay small, current, and trustworthy. Memory tools capture; this command calibrates.
 
 The ladder: **Observation** (noticed once) → **Proven Pattern** (confirmed 2+ times) → **Hard Rule** (a violation caused a real failure). Higher levels override lower ones on conflict.
 
@@ -21,6 +21,12 @@ The ladder: **Observation** (noticed once) → **Proven Pattern** (confirmed 2+ 
    - A pattern contradicted by how the code actually works now → demote one level or retire.
    - Duplicates → merge into the highest-confidence copy.
 
-5. **Report**: a short table of moves (entry, from → to, evidence). If nothing moved, say the ladder is current.
+5. **Audit calibration**: read `.claude/review-calibration.md` (skip if missing). For each entry:
+   - Names a file, function, flag, or pattern that no longer exists in the repo → retire.
+   - Describes a check that a linter, type checker, or test now performs → retire, noting what covers it.
+   - Duplicates or overlaps another entry → merge into the more specific one.
+   Entries carry a date (`learned from PR #NNN, YYYY-MM-DD`). Age alone is not a reason to retire; an old entry about live code stays.
+
+6. **Report**: a short table of moves (entry, from → to, evidence) and retired calibration entries with the reason. If nothing moved, say both files are current.
 
 $ARGUMENTS
