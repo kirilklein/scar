@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" role="img" aria-labelledby="title desc">
+  <title id="title">Feedback that carries into the next change</title>
+  <desc id="desc">Pipeline misses are logged by /gap and grouped by /gaps into proposed fixes. Human feedback becomes calibration through /retro and is loaded by /review. Lessons are added by /retro or the user, audited by /promote, and read by /review at higher confidence levels.</desc>
+  <style>
+    svg { --bg: #ffffff; --text: #202b36; --muted: #596675; --panel: #f5f7f9; --edge: #d9e0e6; --accent: #a84b32; --tint: #fff3ed; }
+    @media (prefers-color-scheme: dark) {
+      svg { --bg: #0d1117; --text: #edf2f7; --muted: #a5b1be; --panel: #161d26; --edge: #364252; --accent: #f09a7d; --tint: #2d211e; }
+    }
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: var(--text); }
+    .muted { fill: var(--muted); }
+    .accent { fill: var(--accent); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .link { fill: none; stroke: var(--muted); stroke-width: 1.5; marker-end: url(#arrow); }
+    .return { fill: none; stroke: var(--accent); stroke-width: 1.5; marker-end: url(#back); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 7 4 1 7" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker>
+    <marker id="back" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 7 4 1 7" fill="none" stroke="var(--accent)" stroke-width="1.5"/></marker>
+  </defs>
+  <rect x="1" y="1" width="958" height="618" rx="20" fill="var(--bg)" stroke="var(--edge)"/>
+  <text x="36" y="46" font-size="25" font-weight="650">Feedback that carries into the next change.</text>
+  <text x="36" y="78" font-size="17" class="muted">Record the miss. Keep the evidence. Update the checks.</text>
+
+<text x="36" y="112" font-size="13" class="muted" font-weight="600" text-anchor="start">01  PIPELINE GAPS</text>
+<text x="36" y="274" font-size="13" class="muted" font-weight="600" text-anchor="start">02  REVIEW FEEDBACK</text>
+<text x="36" y="436" font-size="13" class="muted" font-weight="600" text-anchor="start">03  LESSONS</text>
+<rect x="36" y="126" width="250" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="54" y="161" font-size="18" class="" font-weight="600" text-anchor="start">A later stage catches it</text>
+<text x="54" y="190" font-size="16" class="muted" font-weight="400" text-anchor="start">/gap records the miss</text>
+<rect x="334" y="126" width="282" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="352" y="161" font-size="18" class="mono" font-weight="600" text-anchor="start">workflow-gaps.md</text>
+<text x="352" y="190" font-size="16" class="muted" font-weight="400" text-anchor="start">Which stage missed what</text>
+<rect x="664" y="126" width="260" height="88" rx="12" fill="var(--tint)" stroke="var(--edge)"/>
+<text x="682" y="161" font-size="18" class="mono" font-weight="600" text-anchor="start">/gaps</text>
+<text x="682" y="190" font-size="16" class="muted" font-weight="400" text-anchor="start">Propose fixes for approval</text>
+<path d="M286 170 H332" class="link"/>
+<path d="M616 170 H662" class="link"/>
+<path d="M795 214 V228 Q795 238 785 238 H171 Q161 238 161 228 V216" class="return"/>
+<rect x="296" y="226" width="364" height="25" fill="var(--bg)"/>
+<text x="478" y="244" font-size="16" class="accent" font-weight="400" text-anchor="middle">Use the improved workflow next time</text>
+<rect x="36" y="288" width="250" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="54" y="323" font-size="18" class="" font-weight="600" text-anchor="start">Human PR feedback</text>
+<text x="54" y="352" font-size="16" class="muted" font-weight="400" text-anchor="start">/retro extracts the pattern</text>
+<rect x="334" y="288" width="282" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="352" y="323" font-size="18" class="mono" font-weight="600" text-anchor="start">review-calibration.md</text>
+<text x="352" y="352" font-size="16" class="muted" font-weight="400" text-anchor="start">Specific checks, with a source</text>
+<rect x="664" y="288" width="260" height="88" rx="12" fill="var(--tint)" stroke="var(--edge)"/>
+<text x="682" y="323" font-size="18" class="mono" font-weight="600" text-anchor="start">/review</text>
+<text x="682" y="352" font-size="16" class="muted" font-weight="400" text-anchor="start">Apply checks to the next diff</text>
+<path d="M286 332 H332" class="link"/>
+<path d="M616 332 H662" class="link"/>
+<path d="M795 376 V390 Q795 400 785 400 H171 Q161 400 161 390 V378" class="return"/>
+<rect x="296" y="388" width="364" height="25" fill="var(--bg)"/>
+<text x="478" y="406" font-size="16" class="accent" font-weight="400" text-anchor="middle">Review the next change with those checks</text>
+<rect x="36" y="450" width="250" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="54" y="485" font-size="18" class="" font-weight="600" text-anchor="start">A codebase gotcha</text>
+<text x="54" y="514" font-size="16" class="muted" font-weight="400" text-anchor="start">/retro or you record it</text>
+<rect x="334" y="450" width="282" height="88" rx="12" fill="var(--panel)" stroke="var(--edge)"/>
+<text x="352" y="485" font-size="18" class="mono" font-weight="600" text-anchor="start">lessons.md</text>
+<text x="352" y="514" font-size="16" class="muted" font-weight="400" text-anchor="start">Observation → Pattern → Rule</text>
+<rect x="664" y="450" width="260" height="88" rx="12" fill="var(--tint)" stroke="var(--edge)"/>
+<text x="682" y="485" font-size="18" class="mono" font-weight="600" text-anchor="start">/promote</text>
+<text x="682" y="514" font-size="16" class="muted" font-weight="400" text-anchor="start">Promote, demote, or retire</text>
+<path d="M286 494 H332" class="link"/>
+<path d="M616 494 H662" class="link"/>
+<path d="M795 538 V551 Q795 563 783 563 H487 Q475 563 475 551 V540" class="return"/>
+<text x="36" y="592" font-size="17" class="muted" font-weight="400" text-anchor="start">/review also loads Proven Patterns and Hard Rules from lessons.md.</text>
+</svg>
