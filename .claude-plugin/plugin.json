@@ -1,21 +1,21 @@
 {
-  "name": "feedback-loops",
-  "description": "Pipeline gap tracking for Claude Code: log every time a later stage catches what an earlier one missed, then close the gaps by root cause. Plus PR-feedback review calibration and a confidence ladder for lessons.",
+  "name": "scar",
+  "description": "Scar tissue for your coding agent: when CI, a review bot or a human catches what Claude should have caught earlier, log the miss and turn repeated feedback into checks for future reviews. Pipeline gap tracking, PR-feedback review calibration and a confidence ladder for lessons.",
   "version": "0.1.0",
   "author": {
     "name": "Kiril Klein"
   },
-  "homepage": "https://github.com/kirilklein/self-improving-claude",
+  "homepage": "https://github.com/kirilklein/scar",
   "license": "MIT",
   "keywords": [
+    "review",
+    "calibration",
     "pipeline",
     "gaps",
     "ci",
-    "review",
-    "calibration",
     "retro",
     "feedback",
     "lessons"
   ],
-  "repository": "https://github.com/kirilklein/self-improving-claude"
+  "repository": "https://github.com/kirilklein/scar"
 }

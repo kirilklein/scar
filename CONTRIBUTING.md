@@ -13,8 +13,8 @@ Not wanted: anything that adds a runtime, a dependency, or a database. The whole
 Install the plugin from your local checkout:
 
 ```
-/plugin marketplace add /path/to/self-improving-claude
-/plugin install feedback-loops@self-improving-claude
+/plugin marketplace add /path/to/scar
+/plugin install scar@scar
 ```
 
 Then run the changed command in a project that has a diff (`/review`) or a PR with human comments (`/retro <number>`). Re-run `/plugin install` after each edit to pick up changes.

@@ -1,14 +1,16 @@
-<p align="center"><img src="assets/logo.png" alt="Self-Improving Claude" width="420"></p>
+<p align="center"><img src="assets/logo.png" alt="Scar" width="420"></p>
 
-# Self-Improving Claude
+# Scar
 
-**Your pipeline tells you where it leaks. This plugin makes you write it down.**
+**Your coding agent shouldn't make the same mistake twice.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://docs.anthropic.com/en/docs/claude-code)
 ![No runtime](https://img.shields.io/badge/runtime-none-lightgrey.svg)
 
-Every time a later stage catches something an earlier one should have — review finds what tests missed, CI fails on what passed locally, a human spots what the bot didn't — that is a **pipeline gap**. Everyone experiences them; almost nobody logs them. This plugin does: `/gap` writes one line per gap, from inside whatever workflow you already have, and `/gaps` periodically clusters the log by root cause and closes each cluster at the cheapest layer that can hold it.
+Coding agents are good at fixing mistakes and bad at learning from them. A reviewer tells Claude that every new public sequence parameter needs validation; Claude fixes it; three PRs later it does the same thing again. Scar gives your coding agent scar tissue: when CI, a review bot or a human catches something Claude should have caught earlier, Scar records the miss and turns repeated feedback into checks for future reviews.
+
+The mechanism underneath is **pipeline gap** tracking. Every time a later stage catches something an earlier one should have — review finds what tests missed, CI fails on what passed locally, a human spots what the bot didn't — that is a gap. Everyone experiences them; almost nobody logs them. `/gap` writes one line per gap, from inside whatever workflow you already have, and `/gaps` periodically clusters the log by root cause and closes each cluster at the cheapest layer that can hold it.
 
 <img src="assets/loop2.svg" alt="Loop: /gap logs one line → workflow-gaps.md → /gaps clusters by root cause → tighter pipeline">
 
@@ -60,8 +62,8 @@ One human comment became a check that runs on every future review of that codeba
 1. Install:
 
    ```
-   /plugin marketplace add kirilklein/self-improving-claude
-   /plugin install feedback-loops@self-improving-claude
+   /plugin marketplace add kirilklein/scar
+   /plugin install scar@scar
    ```
 
 2. Paste [`templates/claude-md-snippet.md`](templates/claude-md-snippet.md) into your project's `CLAUDE.md`. Three sentences. From now on, when CI goes red on something that passed locally or a reviewer flags what tests missed, Claude runs `/gap` before fixing it. Or skip the snippet and run `/gap test ci "mocks not updated for new return type"` yourself.
@@ -146,7 +148,7 @@ Templates in [`templates/`](templates/).
 
 ## Origins
 
-This repo started as a full working `~/.claude/` configuration with these loops wired into a `/ship` pipeline. That setup is preserved on the [`config` branch](https://github.com/kirilklein/self-improving-claude/tree/config) (tag `v0.1-config`) for anyone who wants the whole thing. The plugin keeps only the ideas that memory plugins haven't since absorbed.
+This repo started as a full working `~/.claude/` configuration with these loops wired into a `/ship` pipeline. That setup is preserved on the [`config` branch](https://github.com/kirilklein/scar/tree/config) (tag `v0.1-config`) for anyone who wants the whole thing. The plugin keeps only the ideas that memory plugins haven't since absorbed.
 
 ## Contributing
 
