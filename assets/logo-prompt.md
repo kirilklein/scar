@@ -1,6 +1,6 @@
 # Logo direction: a repaired loop
 
-A compact loop with one visible repair seam connects the name Scar to its purpose: a past mistake leaves a useful trace. Use a simple silhouette that reads at avatar size, with a restrained terracotta accent. The README currently uses a text heading while this direction is explored; the original logo is preserved in `logo.png`.
+A compact loop with one visible repair seam connects the name Scar to its purpose: a past mistake leaves a useful trace. Use a simple silhouette that reads at avatar size, with a restrained terracotta accent.
 
 ## Image-generator prompt
 
