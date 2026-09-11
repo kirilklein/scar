@@ -13,6 +13,8 @@ Use exactly these names, in pipeline order:
 format  lint  types  test  review  ci  bot-review  human-review  production  tooling
 ```
 
+A layer names the kind of check that would catch something, not a step you necessarily run. If a reviewer finds a bug that a local review would have caught, the should-have is `review` even when nothing reviews locally; `/gaps` uses that to say whether the stage is worth adding.
+
 `tooling` is for when the pipeline itself broke (wrong lint flags, missing venv, a hook misreading the branch) rather than let something through. Use it as the should-have layer with `—` as caught-by.
 
 ## Format

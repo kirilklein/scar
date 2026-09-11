@@ -16,13 +16,14 @@ Turn the gap log into pipeline improvements. Run this every week or two, or when
    review → human-review   2
    ```
 
-   The top row is where the pipeline leaks most; say so in one line.
+   The top row is where the pipeline leaks most; say so in one line. If a should-have stage never appears as a caught-by, it is probably not run at all; say that too.
 
 3. **Cluster** entries by root cause, not by layer. Examples: "lint config doesn't cover async rules", "tests only run for the changed directory, not callers", "review only reads changed files".
 
 4. **Propose one fix per cluster**, preferring the cheapest layer that closes it:
-   - a linter/formatter/type-checker config change (closes the gap mechanically — best)
-   - a test command or test-mapping change in the project `CLAUDE.md`
+   - running the should-have stage at all, when it is missing (a local review before push, a type checker, a test step)
+   - a linter/formatter/type-checker config change (closes the gap mechanically — best of the rest)
+   - a change to which tests run and when, recorded in the project `CLAUDE.md` (for example, run the callers' tests too)
    - a calibration entry in `.claude/review-calibration.md`
    - a lessons entry (last resort — relies on being remembered)
 

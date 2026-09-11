@@ -3,7 +3,7 @@
 ## What helps most
 
 - **Calibration patterns that worked.** Open an issue with the [calibration pattern template](.github/ISSUE_TEMPLATE/calibration-pattern.md). Real entries from real PRs are the best documentation this repo can have.
-- **Prompt tweaks** to the five commands in `commands/` that make them catch more or ask less. Say which repo you tested on.
+- **Prompt tweaks** to the commands in `commands/` that make them catch more or ask less. Say which repo you tested on.
 - **Template fixes** in `templates/`.
 
 Not wanted: anything that adds a runtime, a dependency, or a database. The whole point is five prompts and three markdown files.
