@@ -15,7 +15,7 @@
 
 A reviewer catches a missing validation check. Claude fixes it. Three PRs later, it makes the same mistake. Scar records that feedback as a concrete check that its `/review` command loads next time.
 
-The same idea applies to your workflow: log what slipped past an earlier stage, find recurring causes, and fix the place that should have caught them. **Five slash commands. Three Markdown files.** Works alongside your existing workflow and memory tools.
+The same idea applies to your workflow: log what slipped past an earlier stage, find recurring causes, and fix the place that should have caught them. **Six slash commands. Three Markdown files.** Works alongside your existing workflow and memory tools.
 
 <p align="center">
   <img src="assets/feedback-loops.svg" width="960" alt="Three feedback paths: /gap records pipeline misses in workflow-gaps.md, then /gaps proposes fixes; /retro turns human PR feedback into review-calibration.md, loaded by /review; /retro or you add lessons.md entries, which /promote audits and /review reads at higher confidence levels. Apply the results to the next change and record new feedback.">
@@ -30,11 +30,13 @@ The same idea applies to your workflow: log what slipped past an earlier stage, 
    /plugin install scar@scar
    ```
 
-2. Add the [gap-logging snippet](templates/claude-md-snippet.md) to your project's `CLAUDE.md`. It tells Claude to record a miss before fixing it. You can also log one yourself:
+2. Run Scar's `/review` before you push and `/triage` when CI or a reviewer comes back with findings. Both log what slipped through before fixing it. You can also log a miss yourself:
 
    ```text
    /gap test ci "mocks not updated for new return type"
    ```
+
+   The [CLAUDE.md snippet](templates/claude-md-snippet.md) reminds Claude to do this when you are not using those commands.
 
 3. After five or more entries, run `/gaps` to group recurring causes and propose fixes. You approve changes before they are applied.
 
@@ -101,27 +103,28 @@ Output trimmed for length only. The reviewer made the comment once. The check no
 
 | Command | Purpose | When to run it |
 |---|---|---|
-| `/gap` | Record what slipped through and which stage caught it | When CI, a reviewer, or production reveals a miss |
+| `/review` | Review a diff using the project's accumulated checks and lessons; logs bugs no test covers | Before pushing, or on demand |
+| `/triage` | Read CI failures and PR comments, log each real miss, then fix | When CI or a reviewer comes back with findings |
+| `/gap` | Record one miss by hand | When something reaches production, or outside the two commands above |
 | `/gaps` | Group misses by root cause and propose a fix for each group | Every week or two, or after five entries |
 | `/retro` | Turn human PR feedback into specific review checks and lessons | After a human reviews your PR |
-| `/review` | Review a diff using the project's accumulated checks and lessons | Before pushing, or on demand |
 | `/promote` | Promote, demote, or retire lessons and calibration entries based on evidence | Monthly, or when nudged at session start |
 
 ## How it works
 
 ### Catch recurring workflow gaps
 
-A **gap** is something a later stage caught that an earlier stage should have. `/gap` records one line in `.claude/workflow-gaps.md`:
+A **gap** is something a later stage caught that an earlier stage should have. Each one is a line in `.claude/workflow-gaps.md`:
 
 ```markdown
 - [2026-03-12] review → bot-review: changed return type to tuple but only reviewed changed files, not callers
 ```
 
-The stages use a fixed vocabulary so `/gaps` can count them: `format`, `lint`, `types`, `test`, `review`, `ci`, `bot-review`, `human-review`, `production`, and `tooling`.
+Three commands write them. `/review` logs a bug it finds that no test covers (`test → review`). `/triage` reads CI failures and bot or human PR comments and logs each real one before fixing it (`… → ci`, `… → bot-review`, `… → human-review`). `/gap` records anything else by hand.
 
-`/gaps` shows which stages miss the most, groups entries by root cause, and proposes a fix at the cheapest effective layer. It prefers an automated check, then a better test command or mapping, then a review calibration entry, and finally a lesson. Once you approve the fixes, it applies them and marks the addressed gaps as resolved.
+The stages use a fixed vocabulary so `/gaps` can count them: `format`, `lint`, `types`, `test`, `review`, `ci`, `bot-review`, `human-review`, `production`, and `tooling`. A stage names the kind of check that would have caught it, not a step you necessarily run. If you never review locally, a reviewer's catch is still `review → human-review`; `/gaps` will then tell you whether a local review step is worth adding.
 
-Call `/gap` directly, use the `CLAUDE.md` snippet, or add it to your existing `/ship` or CI-triage command.
+`/gaps` shows which stages miss the most, groups entries by root cause, and proposes a fix at the cheapest effective layer: run a stage that is missing, tighten an automated check, change which tests run, add a review calibration entry, or as a last resort write a lesson. Once you approve the fixes, it applies them and marks the addressed gaps as resolved.
 
 ### Turn human feedback into review checks
 
@@ -133,6 +136,13 @@ Call `/gap` directly, use the `CLAUDE.md` snippet, or add it to your existing `/
 ```
 
 Scar's `/review` loads that file on each run and marks findings based on those patterns with `[calibrated]`. Codebase gotchas go into `.claude/lessons.md` instead.
+
+Already have a review command you prefer? Keep it and add these two lines to it; that is all Scar's `/review` does differently:
+
+```markdown
+Read `.claude/review-calibration.md` if it exists and apply its patterns alongside the standard checks; mark findings that come from them `[calibrated]`.
+Read the **Hard Rules** and **Proven Patterns** sections of `.claude/lessons.md` if present; flag violations of Hard Rules as findings.
+```
 
 ### Keep lessons grounded in evidence
 
@@ -189,11 +199,11 @@ All files live in your project's `.claude/` directory. They are plain Markdown; 
 
 | File | Updated by | Used by |
 |---|---|---|
-| `workflow-gaps.md` | `/gap`, `/gaps` | `/gaps` |
+| `workflow-gaps.md` | `/review`, `/triage`, `/gap`, `/gaps` | `/gaps` |
 | `review-calibration.md` | `/retro`, `/promote`, approved `/gaps` fixes | `/review`, `/promote` |
 | `lessons.md` | `/retro`, `/promote`, approved `/gaps` fixes, you | `/review`, `/promote` |
 
-Starter files are in [`templates/`](templates/). Scar adds no runtime or database and does not run your CI or replace your workflow. The commands need to be run: `/gaps` periodically, `/retro` after human feedback, `/promote` to prune, and `/review` to apply the accumulated checks. A session-start hook prints a one-line reminder when a file has not been audited in 30 days or the gap log has five or more unresolved entries, and stays silent otherwise.
+Starter files are in [`templates/`](templates/). Scar adds no runtime or database and does not run your CI or replace your workflow. The commands need to be run: `/review` before pushing, `/triage` when CI or a reviewer responds, `/gaps` periodically, `/retro` after human feedback, and `/promote` to prune. A session-start hook prints a one-line reminder when a file has not been audited in 30 days or the gap log has five or more unresolved entries, and stays silent otherwise.
 
 ## Origins and contributing
 

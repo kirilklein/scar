@@ -1,6 +1,6 @@
 ---
 description: Calibrated code review — applies patterns learned from past human PR feedback
-allowed-tools: Read, Grep, Glob, Bash(git diff:*), Bash(git status:*)
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(git diff:*), Bash(git status:*)
 ---
 
 You are doing a focused code review.
@@ -27,6 +27,16 @@ Review the target(s) in **$ARGUMENTS** (files, dirs, globs). If empty, review th
 ## Decisions to verify
 
 After issues, list places where the change makes a choice the author should consciously confirm — behavioral changes, implicit assumptions (thresholds, fallbacks), contract changes affecting callers, named tradeoffs. Each: **Location**, **Decision** (choice made + alternative), **Impact**. Omit the section if there are none.
+
+## Gap log
+
+For each Critical or High bug, check whether an existing test exercises that path. If none does, append one line to `.claude/workflow-gaps.md` (create it from the plugin's `templates/workflow-gaps.md` if missing), above `## Resolved`:
+
+```
+- [YYYY-MM-DD] test → review: <what slipped through, one line>
+```
+
+This is how pre-push gaps get recorded; `/triage` records the post-push ones. Skip it when the target is not a diff.
 
 Keep it concise; skip nitpicks.
 

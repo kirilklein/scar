@@ -1,7 +1,7 @@
 {
   "name": "scar",
   "description": "Scar tissue for your coding agent: when CI, a review bot or a human catches what Claude should have caught earlier, log the miss and turn repeated feedback into checks for future reviews. Pipeline gap tracking, PR-feedback review calibration and a confidence ladder for lessons.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "author": {
     "name": "Kiril Klein"
   },
